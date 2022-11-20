@@ -1,0 +1,7 @@
+**/env
+*test*
+load.py
+memory.txt
+/train
+/val
+yolov5s.pt
