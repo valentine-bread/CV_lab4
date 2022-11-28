@@ -1,12 +1,12 @@
 import cv2 as cv
 import torch
-from torchvision import transforms, models
+from torchvision import transforms
 from PIL import Image
 import time
 
 # Model
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model_yolo = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True).to(device)
+model_yolo = torch.hub.load('ultralytics/yolov5', 'yolov5m', pretrained=True).to(device)
 model = torch.jit.load('Lab4/model_scripted.pt')
 model.eval()
 transforms = transforms.Compose([
@@ -22,21 +22,21 @@ cap.set(cv.CAP_PROP_FPS, 30)
 if not cap.isOpened():
     raise IOError("Cannot open webcam")
 
-start_time,fps, tmp_fps = time.time(), 0, 0
-while cv.waitKey(1) != 27:    
+start_time, fps, tmp_fps = time.time(), 0, 0
+while cv.waitKey(1) != 27:    #press Esc
     tmp_fps += 1    
     ret, frame = cap.read()
     frame = cv.resize(frame, None, fx=0.8, fy=0.8, interpolation= cv.INTER_AREA)
     
     results = model_yolo(frame)
-    data = list(filter(lambda x: x['cls'] == 45 , results.crop(save=False)))
+    data = list(filter(lambda x: x['cls'] == 45, results.crop(save=False)))
     if len(data) > 0:
         batch = torch.zeros([len(data),3,224,224])
         for i in range(len(data)):
             batch[i] = transforms(Image.fromarray(data[i]['im']))
             
         preds = model(batch.to(device))
-        preds_class = torch.nn.functional.softmax(preds, dim=1)[:,1].data.cpu().numpy()
+        preds_class = torch.nn.functional.softmax(preds, dim=1)[:,1].data.cpu().numpy() 
         
         for temp_frame, pred in zip(data, preds_class):
             x = temp_frame['box']
