@@ -1,5 +1,5 @@
 **/env
-*test*
+*test*.*
 load.py
 memory.txt
 /train
