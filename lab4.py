@@ -22,11 +22,13 @@ cap.set(cv.CAP_PROP_FPS, 30)
 if not cap.isOpened():
     raise IOError("Cannot open webcam")
 
+# @profile
+# def foo():
 start_time, fps, tmp_fps = time.time(), 0, 0
 while cv.waitKey(1) != 27:    #press Esc
     tmp_fps += 1    
     ret, frame = cap.read()
-    frame = cv.resize(frame, None, fx=1.0, fy=1.0, interpolation= cv.INTER_AREA)
+    frame = cv.resize(frame, None, fx=0.8, fy=0.8, interpolation= cv.INTER_AREA)
     
     results = model_yolo(frame)
     data = list(filter(lambda x: x['cls'] == 45, results.crop(save=False)))
@@ -40,13 +42,18 @@ while cv.waitKey(1) != 27:    #press Esc
         for temp_frame, pred in zip(data, preds_class):
             x = temp_frame['box']
             cv.rectangle(frame, (int(x[0]),int(x[1])), (int(x[2]),int(x[3])), (0,0,255), 2)
-            cv.putText(frame, ('dirty' if pred > 0.6 else 'cleaned') + str(pred) + '  '+ temp_frame['label'],(int(x[0]),int(x[1])), cv.FONT_HERSHEY_SIMPLEX, 1 ,(255,255,255),2,cv.LINE_AA)
+            line = ''
+            line += ('dirty' if pred > 0.6 else 'cleaned') + ' ' + str(round(pred,2))
+            # line += '  '+ temp_frame['label']
+            cv.putText(frame, line, (int(x[0]),int(x[1])), cv.FONT_HERSHEY_SIMPLEX, 1 ,(255,255,255),2,cv.LINE_AA)
     
     if (time.time() - start_time) > 1:  
         start_time, fps, tmp_fps = time.time(), tmp_fps, 0  
     cv.putText(frame, str(fps) ,(20,20), cv.FONT_HERSHEY_SIMPLEX, 1 ,(255,255,255),2,cv.LINE_AA)
     
     cv.imshow('Input', frame)
+
+# foo()
 
 cap.release()
 cv.destroyAllWindows()
