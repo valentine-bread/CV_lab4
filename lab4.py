@@ -6,6 +6,7 @@ import time
 
 # Model
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = 'cpu'
 model_yolo = torch.hub.load('ultralytics/yolov5', 'yolov5m', pretrained=True).to(device)
 model = torch.jit.load('Lab4/model_scripted.pt')
 model.eval()
